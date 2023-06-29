@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id               String     @id @default(uuid())
+  name             String
+  email            String     @unique
+  password         String
+  last_login       DateTime?
+  phone            String?
+  receivedMessages Messages[] @relation(name: "Receiver")
+  sentMessages     Messages[] @relation(name: "Sender")
+  deleted_at       DateTime?
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt()
+}
+
+model Messages {
+  id          String    @id @default(uuid())
+  sender_id   String
+  sender      Users     @relation(name: "Sender", fields: [sender_id], references: [id])
+  receiver_id String
+  receiver    Users     @relation(name: "Receiver", fields: [receiver_id], references: [id])
+  message     String
+  is_read     Boolean   @default(false)
+  deleted_at  DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt()
+}
